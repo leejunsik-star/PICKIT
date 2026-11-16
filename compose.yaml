@@ -1,0 +1,33 @@
+
+services:
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+
+    environment:
+      PICKIT_DB_PATH: /app/data/pickit.db
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:?Set FLASK_SECRET_KEY in .env}
+
+    volumes:
+      - pickit_data:/app/data
+
+    expose:
+      - "5000"
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+
+    depends_on:
+      - api
+
+    ports:
+      - "8080:80"
+
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  pickit_data:
